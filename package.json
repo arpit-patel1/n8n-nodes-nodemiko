@@ -34,5 +34,12 @@
   "bugs": {
     "url": "https://github.com/arpit-patel1/n8n-nodes-nodemiko/issues"
   },
-  "homepage": "https://github.com/arpit-patel1/n8n-nodes-nodemiko#readme"
+  "homepage": "https://github.com/arpit-patel1/n8n-nodes-nodemiko#readme",
+  "dependencies": {
+    "nodemiko": "^1.1.2"
+  },
+  "devDependencies": {
+    "n8n-core": "^1.14.1",
+    "n8n-workflow": "^1.82.0"
+  }
 }
