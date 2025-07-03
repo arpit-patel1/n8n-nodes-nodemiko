@@ -8,10 +8,10 @@ import {
 } from 'n8n-workflow';
 import { Nodemiko } from 'nodemiko';
 
-export class NodemikoNode implements INodeType {
+export class Nodemiko implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Nodemiko',
-		name: 'nodemikoNode',
+		name: 'nodemiko',
 		icon: 'file:nodemiko.svg',
 		group: ['transform'],
 		version: 1,
