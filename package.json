@@ -1,0 +1,24 @@
+{
+  "name": "n8n-nodes-nodemiko",
+  "version": "1.0.0",
+  "description": "n8n community node for nodemiko",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && gulp build",
+    "dev": "tsc --watch & gulp dev",
+    "format": "prettier --write nodes credentials",
+    "lint": "eslint nodes credentials --ext .js,.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arpit-patel1/n8n-nodes-nodemiko.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arpit-patel1/n8n-nodes-nodemiko/issues"
+  },
+  "homepage": "https://github.com/arpit-patel1/n8n-nodes-nodemiko#readme"
+}
