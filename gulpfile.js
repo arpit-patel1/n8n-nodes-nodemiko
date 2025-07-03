@@ -7,7 +7,7 @@ function clean() {
 }
 
 function copyAssets() {
-	return src('nodes/**/*.svg').pipe(dest('dist/nodes'));
+	return src(['nodes/**/*.svg', 'nodes/**/lib/**/*.js']).pipe(dest('dist/nodes'));
 }
 
 exports.clean = clean;
