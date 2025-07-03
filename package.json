@@ -36,9 +36,6 @@
     "url": "https://github.com/arpit-patel1/n8n-nodes-nodemiko/issues"
   },
   "homepage": "https://github.com/arpit-patel1/n8n-nodes-nodemiko#readme",
-  "dependencies": {
-    "nodemiko": "^2.0.0"
-  },
   "devDependencies": {
     "gulp": "^5.0.1",
     "n8n-core": "^1.14.1",

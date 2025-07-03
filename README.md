@@ -1,6 +1,6 @@
 # n8n-nodes-nodemiko
 
-This is an n8n community node that allows you to interact with network devices using the `nodemiko` library.
+This is an n8n community node that allows you to interact with network devices.
 
 [n8n](https://n8n.io/) is a free and open node-based Workflow Automation Tool. It can be self-hosted, easily extended, and used with third-party web applications or custom in-house tools.
 

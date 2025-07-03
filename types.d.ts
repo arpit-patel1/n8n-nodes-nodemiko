@@ -1,4 +1,3 @@
 declare module 'nodemiko' {
-	function ConnectHandler(options: any): Promise<any>;
-	export = ConnectHandler;
+	export function ConnectHandler(connection_args: any): Promise<any>;
 } 

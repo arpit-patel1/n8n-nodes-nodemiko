@@ -7,7 +7,7 @@ import {
 	NodeConnectionType,
 } from 'n8n-workflow';
 
-const nodemiko = require('nodemiko');
+const nodemiko = require('./lib/connect_handler');
 
 export class Nodemiko implements INodeType {
 	description: INodeTypeDescription = {
