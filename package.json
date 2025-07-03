@@ -8,7 +8,19 @@
     "dev": "tsc --watch & gulp dev",
     "format": "prettier --write nodes credentials",
     "lint": "eslint nodes credentials --ext .js,.ts",
+    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "nodes": [
+      "dist/nodes/Nodemiko/Nodemiko.node.js"
+    ],
+    "credentials": [
+      "dist/credentials/NodemikoApi.credentials.js"
+    ]
   },
   "repository": {
     "type": "git",
