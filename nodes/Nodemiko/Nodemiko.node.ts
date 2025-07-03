@@ -83,24 +83,6 @@ export class Nodemiko implements INodeType {
 						description: 'Send a set of configuration commands to the device',
 						action: 'Send a set of configuration commands to the device',
 					},
-					{
-						name: 'Find Prompt',
-						value: 'findPrompt',
-						description: 'Find the prompt on the device',
-						action: 'Find the prompt on the device',
-					},
-					{
-						name: 'Commit',
-						value: 'commit',
-						description: 'Commit changes on the device',
-						action: 'Commit changes on the device',
-					},
-					{
-						name: 'Enable',
-						value: 'enable',
-						description: 'Enable the device',
-						action: 'Enable the device',
-					},
 				],
 				default: 'sendCommand',
 			},
@@ -218,15 +200,6 @@ export class Nodemiko implements INodeType {
 					case 'sendConfigSet':
 						const commands = (this.getNodeParameter('commands', i, '') as string).split('\n');
 						output = await net_connect.sendConfigSet(commands, additionalFields);
-						break;
-					case 'findPrompt':
-						output = await net_connect.findPrompt();
-						break;
-					case 'commit':
-						output = await net_connect.commit();
-						break;
-					case 'enable':
-						output = await net_connect.enable();
 						break;
 					default:
 						throw new Error(`The operation "${operation}" is not supported.`);
