@@ -31,21 +31,6 @@ export class Nodemiko implements INodeType {
 		],
 		properties: [
 			{
-				displayName: 'Device Type',
-				name: 'deviceType',
-				type: 'options',
-				noDataExpression: true,
-				options: [
-					{ name: 'Cisco IOS', value: 'cisco_ios' },
-					{ name: 'Cisco NX-OS', value: 'cisco_nxos' },
-					{ name: 'Cisco XR', value: 'cisco_xr' },
-					{ name: 'Juniper Junos', value: 'juniper_junos' },
-					{ name: 'Linux SSH', value: 'linux_ssh' },
-				],
-				default: 'cisco_ios',
-				description: 'The type of network device to connect to',
-			},
-			{
 				displayName: 'Resource',
 				name: 'resource',
 				type: 'options',
@@ -166,15 +151,14 @@ export class Nodemiko implements INodeType {
 		const returnData: IDataObject[] = [];
 
 		for (let i = 0; i < items.length; i++) {
-			const deviceType = this.getNodeParameter('deviceType', i) as string;
 			const credentials = await this.getCredentials('nodemikoApi');
-			const { host, username, password, secret, authType, privateKey } = credentials;
+			const { host, username, password, secret, authType, privateKey, deviceType } = credentials;
 
 			const connectionOptions: any = {
 				host: host as string,
 				username: username as string,
 				secret: secret as string,
-				device_type: deviceType,
+				device_type: deviceType as string,
 			};
 
 			if (authType === 'sshKey') {

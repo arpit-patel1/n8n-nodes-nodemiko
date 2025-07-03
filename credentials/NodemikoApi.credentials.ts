@@ -11,6 +11,12 @@ export class NodemikoApi implements ICredentialType {
 			default: '',
 		},
 		{
+			displayName: 'Device Type',
+			name: 'deviceType',
+			type: 'string',
+			default: '',
+		},
+		{
 			displayName: 'Username',
 			name: 'username',
 			type: 'string',
