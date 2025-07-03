@@ -6,6 +6,7 @@ import {
 	INodeExecutionData,
 	NodeConnectionType,
 } from 'n8n-workflow';
+import NodemikoFromLib from 'nodemiko';
 
 export class Nodemiko implements INodeType {
 	description: INodeTypeDescription = {
@@ -182,7 +183,6 @@ export class Nodemiko implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const returnData: IDataObject[] = [];
-		const { default: NodemikoLib } = await import('nodemiko');
 
 		for (let i = 0; i < items.length; i++) {
 			const deviceType = this.getNodeParameter('deviceType', i) as string;
@@ -206,7 +206,7 @@ export class Nodemiko implements INodeType {
 			let output;
 
 			try {
-				net_connect = new NodemikoLib(connectionOptions);
+				net_connect = new NodemikoFromLib(connectionOptions);
 				await net_connect.connect();
 
 				const operation = this.getNodeParameter('operation', i) as string;

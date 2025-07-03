@@ -37,7 +37,7 @@
   },
   "homepage": "https://github.com/arpit-patel1/n8n-nodes-nodemiko#readme",
   "dependencies": {
-    "nodemiko": "^1.1.2"
+    "nodemiko": "^2.0.0"
   },
   "devDependencies": {
     "gulp": "^5.0.1",
