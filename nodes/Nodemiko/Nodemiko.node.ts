@@ -6,7 +6,7 @@ import {
 	INodeExecutionData,
 	NodeConnectionType,
 } from 'n8n-workflow';
-import { Nodemiko } from 'nodemiko';
+import { Nodemiko as NodemikoLib } from 'nodemiko';
 
 export class Nodemiko implements INodeType {
 	description: INodeTypeDescription = {
@@ -202,31 +202,33 @@ export class Nodemiko implements INodeType {
 				connectionOptions.password = password;
 			}
 
-			const conn = new Nodemiko(connectionOptions);
+			let net_connect;
+			let output;
 
 			try {
-				await conn.connect();
+				net_connect = new NodemikoLib(connectionOptions);
+				await net_connect.connect();
+
 				const operation = this.getNodeParameter('operation', i) as string;
+				const command = this.getNodeParameter('command', i, '') as string;
 				const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IDataObject;
-				let output;
 
 				switch (operation) {
 					case 'sendCommand':
-						const command = this.getNodeParameter('command', i) as string;
-						output = await conn.sendCommand(command, additionalFields);
+						output = await net_connect.sendCommand(command, additionalFields);
 						break;
 					case 'sendConfigSet':
-						const commands = (this.getNodeParameter('commands', i) as string).split('\n');
-						output = await conn.sendConfigSet(commands, additionalFields);
+						const commands = (this.getNodeParameter('commands', i, '') as string).split('\n');
+						output = await net_connect.sendConfigSet(commands, additionalFields);
 						break;
 					case 'findPrompt':
-						output = await conn.findPrompt();
+						output = await net_connect.findPrompt();
 						break;
 					case 'commit':
-						output = await conn.commit();
+						output = await net_connect.commit();
 						break;
 					case 'enable':
-						output = await conn.enable();
+						output = await net_connect.enable();
 						break;
 					default:
 						throw new Error(`The operation "${operation}" is not supported.`);
@@ -235,12 +237,14 @@ export class Nodemiko implements INodeType {
 				returnData.push({ result: output });
 			} catch (error) {
 				if (this.continueOnFail()) {
-					returnData.push({ error: (error as Error).message });
+					returnData.push({ error: error.message });
 					continue;
 				}
 				throw error;
 			} finally {
-				await conn.disconnect();
+				if (net_connect) {
+					await net_connect.disconnect();
+				}
 			}
 		}
 
