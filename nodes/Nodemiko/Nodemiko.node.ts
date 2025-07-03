@@ -89,7 +89,8 @@ export class Nodemiko implements INodeType {
 				name: 'commands',
 				type: 'string',
 				typeOptions: {
-					multipleLines: true,
+					rows: 10,
+					multiLine: true,
 				},
 				displayOptions: {
 					show: {
