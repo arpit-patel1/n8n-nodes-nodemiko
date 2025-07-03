@@ -26,7 +26,9 @@
     "type": "git",
     "url": "git+https://github.com/arpit-patel1/n8n-nodes-nodemiko.git"
   },
-  "keywords": [],
+  "keywords": [
+    "n8n-community-node-package"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
