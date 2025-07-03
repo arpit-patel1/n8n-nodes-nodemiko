@@ -23,13 +23,9 @@ export default class BaseConnection {
 
     // Aliases for netmiko compatibility
     this.send_command = this.sendCommand;
-    this.send_command_timing = this.sendCommandTiming;
     this.send_config = this.sendConfig;
     this.find_prompt = this.findPrompt;
     this.check_enable_mode = this.checkEnableMode;
-    this.config_mode = this.configMode;
-    this.check_config_mode = this.checkConfigMode;
-    this.exit_config_mode = this.exitConfigMode;
     this.session_preparation = this.sessionPreparation;
     this.file_transfer = this.fileTransfer;
   }
@@ -188,44 +184,10 @@ export default class BaseConnection {
 
   async sendCommand(command, options = {}) {
     const {
-      expect_string = null,
-      strip_prompt = true,
-      strip_command = true,
-    } = options;
-
-    return new Promise((resolve, reject) => {
-      if (!this.stream) {
-        return reject(new Error('Connection not established'));
-      }
-      this.stream.write(`${command}\n`, async (err) => {
-        if (err) return reject(err);
-        await this._delay(50 * this.global_delay_factor);
-        try {
-          const promptRegex = expect_string ? new RegExp(expect_string) : this.prompt;
-          // Use the default timeout for this method
-          let output = await this.readUntilPrompt(promptRegex, this.read_timeout);
-
-          if (strip_command) {
-            output = output.replace(new RegExp(`^${command}\\s*\\r?\\n`), '');
-          }
-          if (strip_prompt) {
-            output = output.replace(promptRegex, '');
-          }
-
-          resolve(output.trim());
-        } catch (e) {
-          reject(e);
-        }
-      });
-    });
-  }
-
-  async sendCommandTiming(command, options = {}) {
-    const {
-      expect_string = null,
-      strip_prompt = true,
-      strip_command = true,
-      delay_factor = 1,
+      expectString: expect_string = null,
+      stripPrompt: strip_prompt = true,
+      stripCommand: strip_command = true,
+      delayFactor: delay_factor = 1,
     } = options;
 
     return new Promise((resolve, reject) => {
@@ -256,6 +218,7 @@ export default class BaseConnection {
   }
 
   async enable() {
+    // This method is a placeholder for entering enable mode.
     if (this.checkEnableMode()) {
       return '';
     }
@@ -289,15 +252,20 @@ export default class BaseConnection {
   }
 
   checkConfigMode() {
+    // Matches (config)#, (config-if)#, etc.
     return this.config_prompt.test(this.base_prompt);
   }
 
-  async configMode(config_command = 'configure terminal') {
+  async configMode(config_command = 'configure terminal', options = {}) {
     let output = '';
     if (!this.checkConfigMode()) {
-      this.stream.write(`${config_command}\n`);
-      output = await this.readUntilPrompt(this.config_prompt);
-      this._checkError(config_command, output);
+      const cmd_options = {
+        ...options,
+        expectString: this.config_prompt.source,
+        strip_prompt: false,
+        strip_command: false,
+      };
+      output = await this.sendCommand(config_command, cmd_options);
       if (!this.checkConfigMode()) {
         throw new Error('Failed to enter configuration mode.');
       }
@@ -305,12 +273,16 @@ export default class BaseConnection {
     return output;
   }
 
-  async exitConfigMode(exit_command = 'end') {
+  async exitConfigMode(exit_command = 'end', options = {}) {
     let output = '';
     if (this.checkConfigMode()) {
-      this.stream.write(`${exit_command}\n`);
-      output = await this.readUntilPrompt(this.prompt);
-      this._checkError(exit_command, output);
+      const cmd_options = {
+        ...options,
+        expectString: this.prompt.source,
+        strip_prompt: false,
+        strip_command: false,
+      };
+      output = await this.sendCommand(exit_command, cmd_options);
       if (this.checkConfigMode()) {
         throw new Error('Failed to exit configuration mode.');
       }
@@ -319,28 +291,34 @@ export default class BaseConnection {
   }
 
   async commit() {
-    // This method is for transactional devices and does nothing by default.
-    return '';
+    // Placeholder for devices that require a commit (like Juniper)
+    // This should be overridden in the specific vendor class
+    return Promise.resolve('');
   }
 
-  async sendConfig(commands) {
-    const configCmds = Array.isArray(commands) ? commands : [commands];
-    let output = '';
-
-    output += await this.configMode();
-
-    for (const command of configCmds) {
-      this.stream.write(`${command}\n`);
-      const cmdOutput = await this.readUntilPrompt(this.config_prompt);
-      this._checkError(command, cmdOutput);
-      output += cmdOutput;
+  async sendConfig(commands, options = {}) {
+    if (!Array.isArray(commands)) {
+      commands = [commands];
     }
 
-    // Commit if needed (for transactional devices)
-    output += await this.commit();
+    await this.configMode('configure terminal', options);
 
-    output += await this.exitConfigMode();
-    return output;
+    let full_output = '';
+    for (const cmd of commands) {
+      const cmd_options = {
+        ...options,
+        expectString: this.config_prompt.source,
+        strip_prompt: false,
+        strip_command: false,
+      };
+      const output = await this.sendCommand(cmd, cmd_options);
+      this._checkError(cmd, output);
+      full_output += output;
+    }
+
+    await this.exitConfigMode('end', options);
+
+    return full_output;
   }
 
   async fileTransfer(source_file, dest_file, direction = 'put') {
