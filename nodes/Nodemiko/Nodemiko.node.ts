@@ -6,7 +6,8 @@ import {
 	INodeExecutionData,
 	NodeConnectionType,
 } from 'n8n-workflow';
-import ConnectHandler = require('nodemiko');
+
+const nodemiko = require('nodemiko');
 
 export class Nodemiko implements INodeType {
 	description: INodeTypeDescription = {
@@ -206,7 +207,7 @@ export class Nodemiko implements INodeType {
 			let output;
 
 			try {
-				net_connect = await ConnectHandler(connectionOptions);
+				net_connect = await nodemiko.ConnectHandler(connectionOptions);
 
 				const operation = this.getNodeParameter('operation', i) as string;
 				const command = this.getNodeParameter('command', i, '') as string;
