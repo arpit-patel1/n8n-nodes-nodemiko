@@ -148,11 +148,6 @@ export class Nodemiko implements INodeType {
 						type: 'string',
 						default: '',
 						description: 'A regex pattern to detect an error in the command output. For sendConfig only.',
-						displayOptions: {
-							show: {
-								operation: ['sendConfig'],
-							},
-						},
 					},
 					{
 						displayName: 'Config Mode Command',
@@ -160,11 +155,6 @@ export class Nodemiko implements INodeType {
 						type: 'string',
 						default: 'configure terminal',
 						description: 'The command to enter configuration mode. For sendConfig only.',
-						displayOptions: {
-							show: {
-								operation: ['sendConfig'],
-							},
-						},
 					},
 					{
 						displayName: 'Enter Config Mode',
@@ -172,11 +162,6 @@ export class Nodemiko implements INodeType {
 						type: 'boolean',
 						default: true,
 						description: 'Whether to enter configuration mode before sending commands. For sendConfig only.',
-						displayOptions: {
-							show: {
-								operation: ['sendConfig'],
-							},
-						},
 					},
 					{
 						displayName: 'Exit Config Mode',
@@ -184,11 +169,6 @@ export class Nodemiko implements INodeType {
 						type: 'boolean',
 						default: true,
 						description: 'Whether to exit configuration mode after sending commands. For sendConfig only.',
-						displayOptions: {
-							show: {
-								operation: ['sendConfig'],
-							},
-						},
 					},
 				],
 			},
