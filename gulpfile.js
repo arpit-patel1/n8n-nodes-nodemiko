@@ -10,5 +10,8 @@ function copyAssets() {
 	return src('nodes/**/*.svg').pipe(dest('dist/nodes'));
 }
 
+exports.clean = clean;
+exports.copyAssets = copyAssets;
+
 exports.build = series(clean, copyAssets);
 exports.dev = series(clean, copyAssets); 

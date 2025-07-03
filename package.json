@@ -4,7 +4,7 @@
   "description": "n8n community node for nodemiko",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && gulp build",
+    "build": "gulp clean && tsc && gulp copyAssets",
     "dev": "tsc --watch & gulp dev",
     "format": "prettier --write nodes credentials",
     "lint": "eslint nodes credentials --ext .js,.ts",
