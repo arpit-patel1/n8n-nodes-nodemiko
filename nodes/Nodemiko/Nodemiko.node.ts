@@ -36,13 +36,11 @@ export class Nodemiko implements INodeType {
 				type: 'options',
 				noDataExpression: true,
 				options: [
-					{ name: 'Arista EOS', value: 'arista_eos' },
 					{ name: 'Cisco IOS', value: 'cisco_ios' },
-					{ name: 'Cisco XE', value: 'cisco_xe' },
-					{ name: 'Cisco XR', value: 'cisco_xr' },
 					{ name: 'Cisco NX-OS', value: 'cisco_nxos' },
+					{ name: 'Cisco XR', value: 'cisco_xr' },
 					{ name: 'Juniper Junos', value: 'juniper_junos' },
-					{ name: 'Linux', value: 'linux' },
+					{ name: 'Linux SSH', value: 'linux_ssh' },
 				],
 				default: 'cisco_ios',
 				description: 'The type of network device to connect to',
@@ -194,7 +192,7 @@ export class Nodemiko implements INodeType {
 				host: host as string,
 				username: username as string,
 				secret: secret as string,
-				deviceType: deviceType,
+				device_type: deviceType,
 			};
 
 			if (authType === 'sshKey') {
