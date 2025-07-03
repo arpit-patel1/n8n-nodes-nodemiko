@@ -1,9 +1,10 @@
-import { IExecuteFunctions } from 'n8n-core';
 import {
+	IExecuteFunctions,
 	INodeType,
 	INodeTypeDescription,
 	IDataObject,
 	INodeExecutionData,
+	NodeConnectionType,
 } from 'n8n-workflow';
 import { Nodemiko } from 'nodemiko';
 
@@ -19,8 +20,8 @@ export class NodemikoNode implements INodeType {
 		defaults: {
 			name: 'Nodemiko',
 		},
-		inputs: ['main'],
-		outputs: ['main'],
+		inputs: ['main' as NodeConnectionType],
+		outputs: ['main' as NodeConnectionType],
 		credentials: [
 			{
 				name: 'nodemikoApi',
@@ -234,7 +235,7 @@ export class NodemikoNode implements INodeType {
 				returnData.push({ result: output });
 			} catch (error) {
 				if (this.continueOnFail()) {
-					returnData.push({ error: error.message });
+					returnData.push({ error: (error as Error).message });
 					continue;
 				}
 				throw error;
