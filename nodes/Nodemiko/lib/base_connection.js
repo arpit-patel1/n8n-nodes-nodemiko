@@ -297,6 +297,21 @@ export default class BaseConnection {
     return Promise.resolve('');
   }
 
+  async exitEnableMode(exit_command = 'disable', options = {}) {
+    let output = '';
+    if (this.checkEnableMode()) {
+      const cmd_options = {
+        ...options,
+        expectString: this.prompt.source,
+      };
+      output = await this.sendCommand(exit_command, cmd_options);
+      if (this.checkEnableMode()) {
+        throw new Error('Failed to exit enable mode.');
+      }
+    }
+    return output;
+  }
+
   async sendConfig(commands, options = {}) {
     const {
       errorPattern = null,
@@ -307,6 +322,12 @@ export default class BaseConnection {
 
     if (!Array.isArray(commands)) {
       commands = [commands];
+    }
+
+    let entered_enable = false;
+    if (this.device.secret && !this.checkEnableMode()) {
+      await this.enable();
+      entered_enable = true;
     }
 
     if (enterConfigMode) {
@@ -328,6 +349,10 @@ export default class BaseConnection {
 
     if (exitConfigMode) {
       await this.exitConfigMode('end', options);
+    }
+
+    if (entered_enable) {
+      await this.exitEnableMode('disable', options);
     }
 
     return full_output;
