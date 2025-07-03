@@ -38,8 +38,9 @@ export default class BaseConnection {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
   }
 
-  _checkError(command, output) {
-    if (this.config_error_pattern.test(output)) {
+  _checkError(command, output, errorPattern = null) {
+    const pattern = errorPattern ? new RegExp(errorPattern) : this.config_error_pattern;
+    if (pattern.test(output)) {
       throw new Error(`Configuration failed: Error while sending command: "${command}"\nOutput: ${output}`);
     }
   }
@@ -297,11 +298,20 @@ export default class BaseConnection {
   }
 
   async sendConfig(commands, options = {}) {
+    const {
+      errorPattern = null,
+      configModeCommand = 'configure terminal',
+      enterConfigMode = true,
+      exitConfigMode = true,
+    } = options;
+
     if (!Array.isArray(commands)) {
       commands = [commands];
     }
 
-    await this.configMode('configure terminal', options);
+    if (enterConfigMode) {
+      await this.configMode(configModeCommand, options);
+    }
 
     let full_output = '';
     for (const cmd of commands) {
@@ -312,11 +322,13 @@ export default class BaseConnection {
         strip_command: false,
       };
       const output = await this.sendCommand(cmd, cmd_options);
-      this._checkError(cmd, output);
+      this._checkError(cmd, output, errorPattern);
       full_output += output;
     }
 
-    await this.exitConfigMode('end', options);
+    if (exitConfigMode) {
+      await this.exitConfigMode('end', options);
+    }
 
     return full_output;
   }

@@ -142,6 +142,54 @@ export class Nodemiko implements INodeType {
 						default: 1,
 						description: 'A factor to multiply the default delay by',
 					},
+					{
+						displayName: 'Error Pattern',
+						name: 'errorPattern',
+						type: 'string',
+						default: '',
+						description: 'A regex pattern to detect an error in the command output. For sendConfig only.',
+						displayOptions: {
+							show: {
+								operation: ['sendConfig'],
+							},
+						},
+					},
+					{
+						displayName: 'Config Mode Command',
+						name: 'configModeCommand',
+						type: 'string',
+						default: 'configure terminal',
+						description: 'The command to enter configuration mode. For sendConfig only.',
+						displayOptions: {
+							show: {
+								operation: ['sendConfig'],
+							},
+						},
+					},
+					{
+						displayName: 'Enter Config Mode',
+						name: 'enterConfigMode',
+						type: 'boolean',
+						default: true,
+						description: 'Whether to enter configuration mode before sending commands. For sendConfig only.',
+						displayOptions: {
+							show: {
+								operation: ['sendConfig'],
+							},
+						},
+					},
+					{
+						displayName: 'Exit Config Mode',
+						name: 'exitConfigMode',
+						type: 'boolean',
+						default: true,
+						description: 'Whether to exit configuration mode after sending commands. For sendConfig only.',
+						displayOptions: {
+							show: {
+								operation: ['sendConfig'],
+							},
+						},
+					},
 				],
 			},
 		],
