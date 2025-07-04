@@ -130,11 +130,14 @@ export default class BaseConnection {
   }
 
   async readUntilPrompt(promptRegex = this.prompt, timeout = this.read_timeout) {
+    console.log(`[Nodemiko Debug] readUntilPrompt called with regex: ${promptRegex}, timeout: ${timeout}ms`);
     this._log(`readUntilPrompt called with regex: ${promptRegex}, timeout: ${timeout}ms`);
     return new Promise((resolve, reject) => {
       let buffer = '';
       const timeoutId = setTimeout(() => {
         this.stream.removeListener('data', onData);
+        console.log(`[Nodemiko Debug] Read timeout looking for prompt: ${promptRegex}`);
+        console.log(`[Nodemiko Debug] Buffer content at timeout: ${JSON.stringify(buffer)}`);
         this._log(`Read timeout looking for prompt: ${promptRegex}`);
         this._log(`Buffer content at timeout: ${JSON.stringify(buffer)}`);
         reject(new Error(`Read timeout (${timeout}ms) looking for prompt: ${promptRegex}`));
@@ -142,16 +145,21 @@ export default class BaseConnection {
 
       const onData = (data) => {
         const received = data.toString().replace(STRIP_ANSI, '');
+        console.log(`[Nodemiko Debug] readUntilPrompt received: ${JSON.stringify(received)}`);
         this._log(`readUntilPrompt received: ${JSON.stringify(received)}`);
         buffer += received;
+        console.log(`[Nodemiko Debug] Current buffer: ${JSON.stringify(buffer)}`);
         this._log(`Current buffer: ${JSON.stringify(buffer)}`);
         const match = buffer.match(promptRegex);
+        console.log(`[Nodemiko Debug] Regex match result: ${match ? JSON.stringify(match) : 'no match'}`);
         this._log(`Regex match result: ${match ? JSON.stringify(match) : 'no match'}`);
         if (match) {
           this.base_prompt = match[0].trim();
+          console.log(`[Nodemiko Debug] Updated base_prompt to: ${this.base_prompt}`);
           this._log(`Updated base_prompt to: ${this.base_prompt}`);
           clearTimeout(timeoutId);
           this.stream.removeListener('data', onData);
+          console.log(`[Nodemiko Debug] Resolving with buffer: ${JSON.stringify(buffer)}`);
           resolve(buffer);
         }
       };
@@ -222,6 +230,12 @@ export default class BaseConnection {
       delayFactor: delay_factor = 1,
     } = options;
 
+    // Force debug logging to console to see what's happening
+    console.log(`[Nodemiko Debug] sendCommand called with: ${command}`);
+    console.log(`[Nodemiko Debug] Device debug flag: ${this.device ? this.device.debug : 'undefined'}`);
+    console.log(`[Nodemiko Debug] Current prompt regex: ${this.prompt}`);
+    console.log(`[Nodemiko Debug] Current base_prompt: ${this.base_prompt}`);
+    
     this._log(`Sending command: ${command}`);
     this._log(`Command options: ${JSON.stringify(options)}`);
     this._log(`Current prompt regex: ${this.prompt}`);
@@ -240,20 +254,26 @@ export default class BaseConnection {
           this._log(`Using prompt regex: ${promptRegex} with timeout: ${command_timeout}ms`);
           
           let output = await this.readUntilPrompt(promptRegex, command_timeout);
+          console.log(`[Nodemiko Debug] Raw output received: ${JSON.stringify(output)}`);
           this._log(`Raw output received: ${JSON.stringify(output)}`);
 
           if (strip_command) {
             const commandRegex = new RegExp(`^${command}\\s*\\r?\\n`);
+            console.log(`[Nodemiko Debug] Stripping command with regex: ${commandRegex}`);
             this._log(`Stripping command with regex: ${commandRegex}`);
             output = output.replace(commandRegex, '');
+            console.log(`[Nodemiko Debug] After stripping command: ${JSON.stringify(output)}`);
             this._log(`After stripping command: ${JSON.stringify(output)}`);
           }
           if (strip_prompt) {
+            console.log(`[Nodemiko Debug] Stripping prompt with regex: ${promptRegex}`);
             this._log(`Stripping prompt with regex: ${promptRegex}`);
             output = output.replace(promptRegex, '');
+            console.log(`[Nodemiko Debug] After stripping prompt: ${JSON.stringify(output)}`);
             this._log(`After stripping prompt: ${JSON.stringify(output)}`);
           }
 
+          console.log(`[Nodemiko Debug] Final output: ${JSON.stringify(output.trim())}`);
           this._log(`Final output: ${JSON.stringify(output.trim())}`);
           resolve(output.trim());
         } catch (e) {
