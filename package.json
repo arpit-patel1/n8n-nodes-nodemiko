@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-nodemiko",
-  "version": "1.8.17",
+  "version": "1.8.18",
   "description": "n8n community node for nodemiko",
   "main": "index.js",
   "scripts": {
