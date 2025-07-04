@@ -162,19 +162,19 @@ export class Nodemiko implements INodeType {
 					let result;
 					if (operation === 'send_command') {
 						if (device.debug) {
-							console.log(`[Nodemiko] Calling conn.send_command with: ${commands}`);
+							console.log(`[Nodemiko] Calling conn.sendCommand with: ${commands}`);
 						}
-						result = await conn.send_command(commands);
+						result = await conn.sendCommand(commands);
 						if (device.debug) {
-							console.log(`[Nodemiko] send_command result: ${JSON.stringify(result)}`);
+							console.log(`[Nodemiko] sendCommand result: ${JSON.stringify(result)}`);
 						}
 					} else if (operation === 'send_config') {
 						if (device.debug) {
-							console.log(`[Nodemiko] Calling conn.send_config with: ${commands.split('\n')}`);
+							console.log(`[Nodemiko] Calling conn.sendConfig with: ${commands.split('\n')}`);
 						}
-						result = await conn.send_config(commands.split('\n'));
+						result = await conn.sendConfig(commands.split('\n'));
 						if (device.debug) {
-							console.log(`[Nodemiko] send_config result: ${JSON.stringify(result)}`);
+							console.log(`[Nodemiko] sendConfig result: ${JSON.stringify(result)}`);
 						}
 					} else {
 						throw new NodeApiError(this.getNode(), { message: `Unsupported operation: ${operation}` });

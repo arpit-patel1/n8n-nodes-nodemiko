@@ -21,13 +21,7 @@ export default class BaseConnection {
 
     this.config_error_pattern = /(?:Invalid|Incomplete|Ambiguous) command/i;
 
-    // Aliases for netmiko compatibility
-    this.send_command = this.sendCommand;
-    this.send_config = this.sendConfig;
-    this.find_prompt = this.findPrompt;
-    this.check_enable_mode = this.checkEnableMode;
-    this.session_preparation = this.sessionPreparation;
-    this.file_transfer = this.fileTransfer;
+    // No aliases - using camelCase methods only
   }
 
   _log(message) {
@@ -55,22 +49,39 @@ export default class BaseConnection {
   }
 
   connect() {
+    console.log(`[Nodemiko Debug] connect() called for host: ${this.device.host}`);
     return new Promise((resolve, reject) => {
       this.client.on('ready', () => {
+        console.log(`[Nodemiko Debug] SSH client ready for ${this.device.host}`);
         this._log('SSH client ready.');
         this.client.shell((err, stream) => {
-          if (err) return reject(err);
+          if (err) {
+            console.log(`[Nodemiko Debug] Error getting shell: ${err.message}`);
+            return reject(err);
+          }
+          console.log(`[Nodemiko Debug] Shell established for ${this.device.host}`);
           this.stream = stream;
           this.loggedIn = true;
           this.sessionPreparation()
             .then(() => {
+              console.log(`[Nodemiko Debug] Session preparation completed for ${this.device.host}`);
               this.set_base_prompt()
-                .then(() => resolve(this))
-                .catch(reject);
+                .then(() => {
+                  console.log(`[Nodemiko Debug] Base prompt set for ${this.device.host}, resolving connection`);
+                  resolve(this);
+                })
+                .catch((err) => {
+                  console.log(`[Nodemiko Debug] Error setting base prompt: ${err.message}`);
+                  reject(err);
+                });
             })
-            .catch(reject);
+            .catch((err) => {
+              console.log(`[Nodemiko Debug] Error in session preparation: ${err.message}`);
+              reject(err);
+            });
         });
       }).on('error', (err) => {
+        console.log(`[Nodemiko Debug] SSH client error: ${err.message}`);
         reject(err);
       });
 
@@ -169,28 +180,42 @@ export default class BaseConnection {
   }
 
   async findPrompt() {
+    console.log(`[Nodemiko Debug] findPrompt() called`);
     return new Promise((resolve, reject) => {
       if (!this.stream) {
+        console.log(`[Nodemiko Debug] findPrompt: No stream available`);
         return reject(new Error('Connection not established'));
       }
+      console.log(`[Nodemiko Debug] findPrompt: Writing newline to stream`);
       this.stream.write('\n', async (err) => {
-        if (err) return reject(err);
+        if (err) {
+          console.log(`[Nodemiko Debug] findPrompt: Error writing newline: ${err.message}`);
+          return reject(err);
+        }
         try {
+          console.log(`[Nodemiko Debug] findPrompt: Waiting for delay`);
           await this._delay(300 * this.global_delay_factor);
+          console.log(`[Nodemiko Debug] findPrompt: Reading until timeout`);
           const output = await this.readUntilTimeout(1500);
+          console.log(`[Nodemiko Debug] findPrompt: Read output: ${JSON.stringify(output)}`);
           const lines = output.trim().split('\n');
           const new_prompt = lines[lines.length - 1].trim();
+          console.log(`[Nodemiko Debug] findPrompt: Extracted prompt: ${JSON.stringify(new_prompt)}`);
           if (new_prompt && new_prompt.length > 1) {
             this.base_prompt = new_prompt;
             this.prompt = new RegExp(this.escapeRegExp(this.base_prompt) + '\\s*$');
+            console.log(`[Nodemiko Debug] findPrompt: Set base_prompt to: ${this.base_prompt}`);
+            console.log(`[Nodemiko Debug] findPrompt: Set prompt regex to: ${this.prompt}`);
             resolve(this.base_prompt);
           } else {
             // Fallback to a generic prompt if detection fails
+            console.log(`[Nodemiko Debug] findPrompt: Using default prompt as fallback`);
             this.prompt = DEFAULT_PROMPT;
             resolve('');
           }
         } catch (e) {
           // Fallback to a generic prompt on error
+          console.log(`[Nodemiko Debug] findPrompt: Error occurred: ${e.message}, using default prompt`);
           this.prompt = DEFAULT_PROMPT;
           resolve('');
         }

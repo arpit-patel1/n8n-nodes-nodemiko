@@ -20,17 +20,27 @@ export default class CiscoXR extends BaseConnection {
   }
 
   async set_base_prompt() {
+    console.log(`[Nodemiko Debug] CiscoXR set_base_prompt called`);
     this._log('Setting Cisco XR base prompt...');
-    const prompt = await super.set_base_prompt();
-    this._log(`Received prompt from parent: ${JSON.stringify(prompt)}`);
-    if (prompt) {
-      this.base_prompt = prompt.slice(0, 31);
-      this._log(`Cisco XR prompt truncated to: ${this.base_prompt}`);
-      // Update the prompt regex with the truncated prompt
-      this.prompt = new RegExp(this.escapeRegExp(this.base_prompt) + '\\s*$');
-      this._log(`Updated prompt regex to: ${this.prompt}`);
+    try {
+      const prompt = await super.set_base_prompt();
+      console.log(`[Nodemiko Debug] CiscoXR received prompt from parent: ${JSON.stringify(prompt)}`);
+      this._log(`Received prompt from parent: ${JSON.stringify(prompt)}`);
+      if (prompt) {
+        this.base_prompt = prompt.slice(0, 31);
+        console.log(`[Nodemiko Debug] CiscoXR prompt truncated to: ${this.base_prompt}`);
+        this._log(`Cisco XR prompt truncated to: ${this.base_prompt}`);
+        // Update the prompt regex with the truncated prompt
+        this.prompt = new RegExp(this.escapeRegExp(this.base_prompt) + '\\s*$');
+        console.log(`[Nodemiko Debug] CiscoXR updated prompt regex to: ${this.prompt}`);
+        this._log(`Updated prompt regex to: ${this.prompt}`);
+      }
+      console.log(`[Nodemiko Debug] CiscoXR set_base_prompt returning: ${this.base_prompt}`);
+      return this.base_prompt;
+    } catch (error) {
+      console.log(`[Nodemiko Debug] CiscoXR set_base_prompt error: ${error.message}`);
+      throw error;
     }
-    return this.base_prompt;
   }
 
   async disablePaging(command = 'terminal length 0') {
