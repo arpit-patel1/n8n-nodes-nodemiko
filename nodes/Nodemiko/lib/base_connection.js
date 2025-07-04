@@ -248,6 +248,12 @@ export default class BaseConnection {
   }
 
   async sendCommand(command, options = {}) {
+    console.log(`[Nodemiko Debug] *** ENTERING sendCommand ***`);
+    console.log(`[Nodemiko Debug] sendCommand: this object type: ${typeof this}`);
+    console.log(`[Nodemiko Debug] sendCommand: this constructor: ${this.constructor.name}`);
+    console.log(`[Nodemiko Debug] sendCommand: command parameter: ${JSON.stringify(command)}`);
+    console.log(`[Nodemiko Debug] sendCommand: options parameter: ${JSON.stringify(options)}`);
+    
     const {
       expectString: expect_string = null,
       stripPrompt: strip_prompt = true,
@@ -255,27 +261,47 @@ export default class BaseConnection {
       delayFactor: delay_factor = 1,
     } = options;
 
+    console.log(`[Nodemiko Debug] sendCommand: Destructured options`);
+    console.log(`[Nodemiko Debug] sendCommand: expect_string: ${expect_string}`);
+    console.log(`[Nodemiko Debug] sendCommand: strip_prompt: ${strip_prompt}`);
+    console.log(`[Nodemiko Debug] sendCommand: strip_command: ${strip_command}`);
+    console.log(`[Nodemiko Debug] sendCommand: delay_factor: ${delay_factor}`);
+
     // Force debug logging to console to see what's happening
     console.log(`[Nodemiko Debug] sendCommand called with: ${command}`);
     console.log(`[Nodemiko Debug] Device debug flag: ${this.device ? this.device.debug : 'undefined'}`);
     console.log(`[Nodemiko Debug] Current prompt regex: ${this.prompt}`);
     console.log(`[Nodemiko Debug] Current base_prompt: ${this.base_prompt}`);
+    console.log(`[Nodemiko Debug] Stream exists: ${!!this.stream}`);
+    console.log(`[Nodemiko Debug] Logged in: ${this.loggedIn}`);
     
     this._log(`Sending command: ${command}`);
     this._log(`Command options: ${JSON.stringify(options)}`);
     this._log(`Current prompt regex: ${this.prompt}`);
     this._log(`Current base_prompt: ${this.base_prompt}`);
     
+    console.log(`[Nodemiko Debug] sendCommand: Creating Promise`);
     return new Promise((resolve, reject) => {
+      console.log(`[Nodemiko Debug] sendCommand: Inside Promise executor`);
       if (!this.stream) {
+        console.log(`[Nodemiko Debug] sendCommand: No stream available, rejecting`);
         return reject(new Error('Connection not established'));
       }
+      console.log(`[Nodemiko Debug] sendCommand: Stream available, writing command`);
       this.stream.write(`${command}\n`, async (err) => {
-        if (err) return reject(err);
+        console.log(`[Nodemiko Debug] sendCommand: Write callback called`);
+        if (err) {
+          console.log(`[Nodemiko Debug] sendCommand: Write error: ${err.message}`);
+          return reject(err);
+        }
+        console.log(`[Nodemiko Debug] sendCommand: Command written successfully, waiting for delay`);
         await this._delay(50 * this.global_delay_factor);
+        console.log(`[Nodemiko Debug] sendCommand: Delay completed, starting try block`);
         try {
           const promptRegex = expect_string ? new RegExp(expect_string) : this.prompt;
           const command_timeout = this.read_timeout * delay_factor;
+          console.log(`[Nodemiko Debug] sendCommand: Prompt regex: ${promptRegex}`);
+          console.log(`[Nodemiko Debug] sendCommand: Command timeout: ${command_timeout}ms`);
           this._log(`Using prompt regex: ${promptRegex} with timeout: ${command_timeout}ms`);
           
           let output = await this.readUntilPrompt(promptRegex, command_timeout);
@@ -300,8 +326,11 @@ export default class BaseConnection {
 
           console.log(`[Nodemiko Debug] Final output: ${JSON.stringify(output.trim())}`);
           this._log(`Final output: ${JSON.stringify(output.trim())}`);
+          console.log(`[Nodemiko Debug] sendCommand: About to resolve with output`);
           resolve(output.trim());
         } catch (e) {
+          console.log(`[Nodemiko Debug] sendCommand: Caught error in try block: ${e.message}`);
+          console.log(`[Nodemiko Debug] sendCommand: Error stack: ${e.stack}`);
           this._log(`Error in sendCommand: ${e.message}`);
           reject(e);
         }

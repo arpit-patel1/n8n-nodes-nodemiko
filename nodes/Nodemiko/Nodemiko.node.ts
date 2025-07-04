@@ -154,13 +154,16 @@ export class Nodemiko implements INodeType {
 				const operation = this.getNodeParameter('operation', itemIndex, '');
 				const commands = this.getNodeParameter('commands', itemIndex, '') as string;
 
+				console.log(`[Nodemiko Debug] About to call withConnection`);
 				await withConnection(device, async (conn: any) => {
+					console.log(`[Nodemiko Debug] Inside withConnection callback`);
 					if (device.debug) {
 						console.log(`[Nodemiko] Starting ${operation} operation with command: ${commands}`);
 					}
 					
 					let result;
 					if (operation === 'send_command') {
+						console.log(`[Nodemiko Debug] Operation is send_command`);
 						if (device.debug) {
 							console.log(`[Nodemiko] Calling conn.sendCommand with: ${commands}`);
 						}
@@ -169,8 +172,10 @@ export class Nodemiko implements INodeType {
 						console.log(`[Nodemiko Debug] Connection object constructor: ${conn.constructor.name}`);
 						console.log(`[Nodemiko Debug] sendCommand method exists: ${typeof conn.sendCommand}`);
 						console.log(`[Nodemiko Debug] Connection object keys: ${Object.keys(conn)}`);
+						console.log(`[Nodemiko Debug] About to call conn.sendCommand`);
 						
 						result = await conn.sendCommand(commands);
+						console.log(`[Nodemiko Debug] conn.sendCommand completed`);
 						console.log(`[Nodemiko Debug] Raw sendCommand result type: ${typeof result}`);
 						console.log(`[Nodemiko Debug] Raw sendCommand result length: ${result ? result.length : 'null/undefined'}`);
 						if (device.debug) {
