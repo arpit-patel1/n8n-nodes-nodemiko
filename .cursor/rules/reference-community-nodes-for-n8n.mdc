@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 🛠️ Cursor Project Rule: Build n8n Custom Node (Netmiko Clone) using Community Node References
+
+## 🎯 Goal
+Create a custom `n8n` node (TypeScript) to interact with network devices over SSH — inspired by Python's **Netmiko** library — by referring to existing community nodes found in the `reference_nodes_examples/` folder.
+---
+
+## 📁 Context
+You have access to a folder: reference_nodes_examples for reference.
+
+ 

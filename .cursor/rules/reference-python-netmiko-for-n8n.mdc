@@ -1,0 +1,20 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# n8n Custom Node – Netmiko Clone
+
+## 🎯 Goal
+Build a custom `n8n` node that mimics the behavior of the Python **Netmiko** library to interact with network devices over SSH. The node should support **multi-vendor** devices like Cisco, Juniper, Arista, etc.
+
+
+
+## ✅ Key Features
+- Language: **Node.js + TypeScript**
+- Use **`ssh2`** Node.js library for SSH connections
+
+## Reference code
+- python netmiko reference code is available in folder: reference_python_netmiko
+- Use it only for refernece.
+- Our goal is to see its implementation and create n8n node accordingly.
