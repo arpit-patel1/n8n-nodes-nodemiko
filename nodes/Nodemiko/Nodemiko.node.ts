@@ -213,7 +213,7 @@ export class Nodemiko implements INodeType {
 					host: this.getNodeParameter('host', itemIndex, '') as string,
 					username: this.getNodeParameter('username', itemIndex, '') as string,
 					password: this.getNodeParameter('password', itemIndex, '') as string,
-					device_type: this.getNodeParameter('device_type', itemIndex, '') as string,
+					device_type: this.getNodeParameter('device_type', itemIndex, 'cisco_ios') as string,
 					port: this.getNodeParameter('port', itemIndex, 22) as number,
 					secret: options.secret || '',
 					use_keys: options.use_keys || false,
