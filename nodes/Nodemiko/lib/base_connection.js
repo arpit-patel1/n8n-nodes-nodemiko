@@ -54,7 +54,7 @@ export default class BaseConnection {
           this.loggedIn = true;
           this.sessionPreparation()
             .then(() => {
-              this.findPrompt()
+              this.set_base_prompt()
                 .then(() => resolve(this))
                 .catch(reject);
             })
@@ -253,20 +253,17 @@ export default class BaseConnection {
   }
 
   checkConfigMode() {
-    // Matches (config)#, (config-if)#, etc.
     return this.config_prompt.test(this.base_prompt);
   }
 
   async configMode(config_command = 'configure terminal', options = {}) {
+    const { expectString = null } = options;
+    const promptRegex = expectString ? new RegExp(expectString) : this.config_prompt;
     let output = '';
+
     if (!this.checkConfigMode()) {
-      const cmd_options = {
-        ...options,
-        expectString: this.config_prompt.source,
-        strip_prompt: false,
-        strip_command: false,
-      };
-      output = await this.sendCommand(config_command, cmd_options);
+      this.stream.write(`${config_command}\n`);
+      output = await this.readUntilPrompt(promptRegex);
       if (!this.checkConfigMode()) {
         throw new Error('Failed to enter configuration mode.');
       }
@@ -275,15 +272,13 @@ export default class BaseConnection {
   }
 
   async exitConfigMode(exit_command = 'end', options = {}) {
+    const { expectString = null } = options;
+    const promptRegex = expectString ? new RegExp(expectString) : this.prompt;
     let output = '';
+
     if (this.checkConfigMode()) {
-      const cmd_options = {
-        ...options,
-        expectString: this.prompt.source,
-        strip_prompt: false,
-        strip_command: false,
-      };
-      output = await this.sendCommand(exit_command, cmd_options);
+      this.stream.write(`${exit_command}\n`);
+      output = await this.readUntilPrompt(promptRegex);
       if (this.checkConfigMode()) {
         throw new Error('Failed to exit configuration mode.');
       }
@@ -395,5 +390,23 @@ export default class BaseConnection {
         }
       });
     });
+  }
+
+  async set_base_prompt() {
+    // For some devices, we need to do something special to find the prompt.
+    // This is a placeholder for those devices.
+    const prompt = await this.findPrompt();
+    this.prompt = new RegExp(this.escapeRegExp(prompt) + '\\s*$');
+    this.base_prompt = prompt;
+    return this.base_prompt;
+  }
+
+  async disablePaging(command = 'terminal length 0') {
+    // Overridden by subclasses.
+    try {
+      return await this.sendCommand(command);
+    } catch (err) {
+      // Ignore errors from devices that don't support this command.
+    }
   }
 }
