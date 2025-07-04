@@ -13,17 +13,23 @@ const vendors = {
 };
 
 export function sshDispatcher(device, options = {}) {
-  console.log(`[Nodemiko Debug] sshDispatcher: Called with device_type: ${device.device_type}`);
-  console.log(`[Nodemiko Debug] sshDispatcher: Available vendors: ${Object.keys(vendors)}`);
-  console.log(`[Nodemiko Debug] sshDispatcher: Vendor found: ${!!vendors[device.device_type]}`);
+  if (device.debug) {
+    console.log(`[Nodemiko Debug] sshDispatcher: Called with device_type: ${device.device_type}`);
+    console.log(`[Nodemiko Debug] sshDispatcher: Available vendors: ${Object.keys(vendors)}`);
+    console.log(`[Nodemiko Debug] sshDispatcher: Vendor found: ${!!vendors[device.device_type]}`);
+  }
   
   if (vendors[device.device_type]) {
-    console.log(`[Nodemiko Debug] sshDispatcher: Creating new ${device.device_type} instance`);
+    if (device.debug) {
+      console.log(`[Nodemiko Debug] sshDispatcher: Creating new ${device.device_type} instance`);
+    }
     const instance = new vendors[device.device_type](device);
-    console.log(`[Nodemiko Debug] sshDispatcher: Instance created, type: ${typeof instance}`);
-    console.log(`[Nodemiko Debug] sshDispatcher: Instance constructor: ${instance.constructor.name}`);
-    console.log(`[Nodemiko Debug] sshDispatcher: Instance sendCommand exists: ${typeof instance.sendCommand}`);
-    console.log(`[Nodemiko Debug] sshDispatcher: Calling connect() method`);
+    if (device.debug) {
+      console.log(`[Nodemiko Debug] sshDispatcher: Instance created, type: ${typeof instance}`);
+      console.log(`[Nodemiko Debug] sshDispatcher: Instance constructor: ${instance.constructor.name}`);
+      console.log(`[Nodemiko Debug] sshDispatcher: Instance sendCommand exists: ${typeof instance.sendCommand}`);
+      console.log(`[Nodemiko Debug] sshDispatcher: Calling connect() method`);
+    }
     return instance.connect();
   }
   throw new Error(`Unsupported device type: ${device.device_type}`);

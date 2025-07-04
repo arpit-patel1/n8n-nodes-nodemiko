@@ -20,34 +20,34 @@ export default class CiscoXR extends BaseConnection {
   }
 
   async set_base_prompt() {
-    console.log(`[Nodemiko Debug] CiscoXR set_base_prompt called`);
-    console.log(`[Nodemiko Debug] CiscoXR current base_prompt: ${JSON.stringify(this.base_prompt)}`);
+    this._log('CiscoXR set_base_prompt called');
+    this._log(`CiscoXR current base_prompt: ${JSON.stringify(this.base_prompt)}`);
     this._log('Setting Cisco XR base prompt...');
     
     // If we already have a valid base_prompt, preserve it
     if (this.base_prompt && this.base_prompt.length > 1) {
-      console.log(`[Nodemiko Debug] CiscoXR already has valid base_prompt, keeping: ${this.base_prompt}`);
+      this._log(`CiscoXR already has valid base_prompt, keeping: ${this.base_prompt}`);
       this._log(`Already have valid base_prompt, keeping: ${this.base_prompt}`);
       return this.base_prompt;
     }
     
     try {
       const prompt = await super.set_base_prompt();
-      console.log(`[Nodemiko Debug] CiscoXR received prompt from parent: ${JSON.stringify(prompt)}`);
+      this._log(`CiscoXR received prompt from parent: ${JSON.stringify(prompt)}`);
       this._log(`Received prompt from parent: ${JSON.stringify(prompt)}`);
       if (prompt) {
         this.base_prompt = prompt.slice(0, 31);
-        console.log(`[Nodemiko Debug] CiscoXR prompt truncated to: ${this.base_prompt}`);
+        this._log(`CiscoXR prompt truncated to: ${this.base_prompt}`);
         this._log(`Cisco XR prompt truncated to: ${this.base_prompt}`);
         // Update the prompt regex with the truncated prompt
         this.prompt = new RegExp(this.escapeRegExp(this.base_prompt) + '\\s*$');
-        console.log(`[Nodemiko Debug] CiscoXR updated prompt regex to: ${this.prompt}`);
+        this._log(`CiscoXR updated prompt regex to: ${this.prompt}`);
         this._log(`Updated prompt regex to: ${this.prompt}`);
       }
-      console.log(`[Nodemiko Debug] CiscoXR set_base_prompt returning: ${this.base_prompt}`);
+      this._log(`CiscoXR set_base_prompt returning: ${this.base_prompt}`);
       return this.base_prompt;
     } catch (error) {
-      console.log(`[Nodemiko Debug] CiscoXR set_base_prompt error: ${error.message}`);
+      this._log(`CiscoXR set_base_prompt error: ${error.message}`);
       throw error;
     }
   }
