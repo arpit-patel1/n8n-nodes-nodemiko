@@ -6,7 +6,7 @@ export default class CiscoXR extends BaseConnection {
     // Example prompt: RP/0/RSP0/CPU0:XR-1#
     this.prompt = /(.*[#>$])\s*$/;
     // Example config prompt: RP/0/RSP0/CPU0:XR-1(config)#
-    this.configPrompt = /(.*\(config[^\)]*\)#\s*)$/;
+    this.config_prompt = /(.*\(config[^\)]*\)#\s*)$/;
     this.commit_error_pattern = /Failed to commit/i;
   }
 
