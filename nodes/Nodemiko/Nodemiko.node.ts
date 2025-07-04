@@ -19,8 +19,8 @@ export class Nodemiko implements INodeType {
 		icon: 'file:nodemiko.svg',
 		group: ['transform'],
 		version: 1,
-		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-		description: 'Interact with network devices using Nodemiko',
+		subtitle: '={{$parameter["operation"]}}',
+		description: 'SSH into a network device and run commands',
 		defaults: {
 			name: 'Nodemiko',
 		},
@@ -34,146 +34,39 @@ export class Nodemiko implements INodeType {
 		],
 		properties: [
 			{
-				displayName: 'Resource',
-				name: 'resource',
-				type: 'options',
-				noDataExpression: true,
-				options: [
-					{
-						name: 'Device',
-						value: 'device',
-					},
-				],
-				default: 'device',
-			},
-			{
 				displayName: 'Operation',
 				name: 'operation',
 				type: 'options',
 				noDataExpression: true,
-				displayOptions: {
-					show: {
-						resource: [
-							'device',
-						],
-					},
-				},
 				options: [
 					{
 						name: 'Send Command',
-						value: 'sendCommand',
-						description: 'Send a command to the device',
-						action: 'Send a command to the device',
+						value: 'send_command',
+						action: 'Send a command',
 					},
 					{
-						name: 'Send Config Set',
-						value: 'sendConfig',
-						description: 'Send a set of configuration commands to the device',
-						action: 'Send a set of configuration commands to the device',
+						name: 'Send Config',
+						value: 'send_config',
+						action: 'Send a configuration command',
 					},
 				],
-				default: 'sendCommand',
-			},
-			{
-				displayName: 'Command',
-				name: 'command',
-				type: 'string',
-				displayOptions: {
-					show: {
-						resource: ['device'],
-						operation: ['sendCommand'],
-					},
-				},
-				default: '',
-				description: 'The command to send to the device',
+				default: 'send_command',
 			},
 			{
 				displayName: 'Commands',
 				name: 'commands',
 				type: 'string',
-				typeOptions: {
-					rows: 10,
-					multiLine: true,
-				},
-				displayOptions: {
-					show: {
-						resource: ['device'],
-						operation: ['sendConfig'],
-					},
-				},
 				default: '',
-				description: 'A set of configuration commands to send to the device, one per line',
+				placeholder: 'show version',
+				description: 'The command to run',
+				required: true,
 			},
 			{
-				displayName: 'Additional Fields',
-				name: 'additionalFields',
-				type: 'collection',
-				placeholder: 'Add Field',
-				default: {},
-				displayOptions: {
-					show: {
-						resource: ['device'],
-						operation: ['sendCommand', 'sendConfig'],
-					},
-				},
-				options: [
-					{
-						displayName: 'Expect String',
-						name: 'expectString',
-						type: 'string',
-						default: '',
-						description: 'A regex pattern to look for in the output to signify the command is done',
-					},
-					{
-						displayName: 'Strip Prompt',
-						name: 'stripPrompt',
-						type: 'boolean',
-						default: true,
-						description: 'Whether to strip the prompt from the output',
-					},
-					{
-						displayName: 'Strip Command',
-						name: 'stripCommand',
-						type: 'boolean',
-						default: true,
-						description: 'Whether to strip the command from the output',
-					},
-					{
-						displayName: 'Delay Factor',
-						name: 'delayFactor',
-						type: 'number',
-						default: 1,
-						description: 'A factor to multiply the default delay by',
-					},
-					{
-						displayName: 'Error Pattern',
-						name: 'errorPattern',
-						type: 'string',
-						default: '',
-						description: 'A regex pattern to detect an error in the command output. For sendConfig only.',
-					},
-					{
-						displayName: 'Config Mode Command',
-						name: 'configModeCommand',
-						type: 'string',
-						default: 'configure terminal',
-						description: 'The command to enter configuration mode. For sendConfig only.',
-					},
-					{
-						displayName: 'Enter Config Mode',
-						name: 'enterConfigMode',
-						type: 'boolean',
-						default: true,
-						description: 'Whether to enter configuration mode before sending commands. For sendConfig only.',
-					},
-					{
-						displayName: 'Exit Config Mode',
-						name: 'exitConfigMode',
-						type: 'boolean',
-						default: true,
-						description: 'Whether to exit configuration mode after sending commands. For sendConfig only.',
-					},
-				],
+				displayName: 'Port',
+				name: 'port',
+				type: 'number',
+				default: 22,
+				description: 'The port to connect to',
 			},
 			{
 				displayName: 'Options',
@@ -193,8 +86,46 @@ export class Nodemiko implements INodeType {
 						displayName: 'Connection Timeout',
 						name: 'conn_timeout',
 						type: 'number',
-						default: 10000,
+						default: 20000,
 						description: 'The connection timeout in milliseconds.',
+					},
+					{
+						displayName: 'Read Timeout',
+						name: 'read_timeout',
+						type: 'number',
+						default: 10000,
+						description: 'The read timeout in milliseconds.',
+					},
+					{
+						displayName: 'Global Delay Factor',
+						name: 'global_delay_factor',
+						type: 'number',
+						default: 1,
+						description: 'A multiplier to adjust delays for slower devices.',
+					},
+					{
+						displayName: 'Use Keys',
+						name: 'use_keys',
+						type: 'boolean',
+						default: false,
+						description: 'Whether to use SSH keys for authentication.',
+					},
+					{
+						displayName: 'Key File',
+						name: 'key_file',
+						type: 'string',
+						default: '',
+						description: 'The path to the private key file.',
+					},
+					{
+						displayName: 'Passphrase',
+						name: 'passphrase',
+						type: 'string',
+						typeOptions: {
+							password: true,
+						},
+						default: '',
+						description: 'The passphrase for the private key.',
 					},
 				],
 			},
@@ -203,19 +134,22 @@ export class Nodemiko implements INodeType {
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
+
+		let item: INodeExecutionData;
 		const returnData: INodeExecutionData[] = [];
 
 		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 			try {
+				const credentials = await this.getCredentials('nodemikoApi') as IDataObject;
 				const options = this.getNodeParameter('options', itemIndex, {}) as any;
 
 				const device: any = {
-					host: this.getNodeParameter('host', itemIndex, '') as string,
-					username: this.getNodeParameter('username', itemIndex, '') as string,
-					password: this.getNodeParameter('password', itemIndex, '') as string,
-					device_type: this.getNodeParameter('device_type', itemIndex, 'cisco_ios') as string,
+					host: credentials.host as string,
+					username: credentials.username as string,
+					password: credentials.password as string,
+					device_type: credentials.device_type as string,
 					port: this.getNodeParameter('port', itemIndex, 22) as number,
-					secret: options.secret || '',
+					secret: credentials.secret || '',
 					use_keys: options.use_keys || false,
 					key_file: options.key_file || '',
 					passphrase: options.passphrase || '',
@@ -249,7 +183,9 @@ export class Nodemiko implements INodeType {
 					});
 				}, { logger: Logger });
 
+
 			} catch (error) {
+				// This node should never fail but catch errors to prevent halting the workflow
 				if (this.continueOnFail()) {
 					returnData.push({
 						json: {
@@ -266,6 +202,6 @@ export class Nodemiko implements INodeType {
 			}
 		}
 
-		return [this.helpers.returnJsonArray(returnData)];
+		return [returnData];
 	}
 } 
