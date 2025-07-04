@@ -5,9 +5,13 @@ import {
 	IDataObject,
 	INodeExecutionData,
 	NodeConnectionType,
+	LoggerProxy as Logger,
+	NodeApiError,
 } from 'n8n-workflow';
 
 const nodemiko = require('./lib/connect_handler');
+import sshDispatcher from './lib/ssh_dispatcher.js';
+import withConnection from './lib/utils/withConnection.js';
 
 export class Nodemiko implements INodeType {
 	description: INodeTypeDescription = {
@@ -200,58 +204,66 @@ export class Nodemiko implements INodeType {
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
-		const returnData: IDataObject[] = [];
+		const returnData: INodeExecutionData[] = [];
 
-		for (let i = 0; i < items.length; i++) {
-			const credentials = await this.getCredentials('nodemikoApi');
-			const { host, username, password, secret, authType, privateKey, deviceType } = credentials;
-
-			const connectionOptions: any = {
-				host: host as string,
-				username: username as string,
-				secret: secret as string,
-				device_type: deviceType as string,
-			};
-
-			if (authType === 'sshKey') {
-				connectionOptions.key = privateKey;
-			} else {
-				connectionOptions.password = password;
-			}
-
-			let net_connect;
-			let output;
-
+		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 			try {
-				net_connect = await nodemiko.ConnectHandler(connectionOptions);
+				const options = this.getNodeParameter('options', itemIndex, {}) as any;
 
-				const operation = this.getNodeParameter('operation', i) as string;
-				const command = this.getNodeParameter('command', i, '') as string;
-				const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IDataObject;
+				const device: any = {
+					host: this.getNodeParameter('host', itemIndex, '') as string,
+					username: this.getNodeParameter('username', itemIndex, '') as string,
+					password: this.getNodeParameter('password', itemIndex, '') as string,
+					device_type: this.getNodeParameter('device_type', itemIndex, '') as string,
+					port: this.getNodeParameter('port', itemIndex, 22) as number,
+					secret: options.secret || '',
+					use_keys: options.use_keys || false,
+					key_file: options.key_file || '',
+					passphrase: options.passphrase || '',
+					global_delay_factor: options.global_delay_factor || 1,
+					conn_timeout: options.conn_timeout || 20000,
+					read_timeout: options.read_timeout || 10000,
+					debug: options.debug || false,
+				};
 
-				switch (operation) {
-					case 'sendCommand':
-						output = await net_connect.sendCommand(command, additionalFields);
-						break;
-					case 'sendConfig':
-						const commands = (this.getNodeParameter('commands', i, '') as string).split('\n');
-						output = await net_connect.sendConfig(commands, additionalFields);
-						break;
-					default:
-						throw new Error(`The operation "${operation}" is not supported.`);
-				}
+				const operation = this.getNodeParameter('operation', itemIndex, '');
+				const commands = this.getNodeParameter('commands', itemIndex, '') as string;
 
-				returnData.push({ result: output });
+				await withConnection(device, async (conn: any) => {
+					let result;
+					if (operation === 'send_command') {
+						result = await conn.send_command(commands);
+					} else if (operation === 'send_config') {
+						result = await conn.send_config(commands.split('\n'));
+					} else {
+						throw new NodeApiError(this.getNode(), { message: `Unsupported operation: ${operation}` });
+					}
+
+					returnData.push({
+						json: {
+							device: device.host,
+							result: result,
+						},
+						pairedItem: {
+							item: itemIndex,
+						},
+					});
+				}, { logger: Logger });
+
 			} catch (error) {
 				if (this.continueOnFail()) {
-					returnData.push({ error: (error as Error).message });
+					returnData.push({
+						json: {
+							error: (error as Error).message,
+						},
+						pairedItem: {
+							item: itemIndex,
+						}
+					});
 					continue;
 				}
+
 				throw error;
-			} finally {
-				if (net_connect) {
-					await net_connect.disconnect();
-				}
 			}
 		}
 

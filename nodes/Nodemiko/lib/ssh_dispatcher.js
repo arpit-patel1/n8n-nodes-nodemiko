@@ -1,21 +1,22 @@
 import CiscoIOS from './vendors/cisco_ios.js';
-import CiscoNXOS from './vendors/cisco_nxos.js';
 import CiscoXR from './vendors/cisco_xr.js';
+import CiscoNXOS from './vendors/cisco_nxos.js';
 import JuniperJunos from './vendors/juniper_junos.js';
 import LinuxSSH from './vendors/linux_ssh.js';
 
-const CLASS_MAPPER = {
-  'cisco_ios': CiscoIOS,
-  'cisco_nxos': CiscoNXOS,
-  'cisco_xr': CiscoXR,
-  'juniper_junos': JuniperJunos,
-  'linux_ssh': LinuxSSH,
+const vendors = {
+  cisco_ios: CiscoIOS,
+  cisco_xr: CiscoXR,
+  cisco_nxos: CiscoNXOS,
+  juniper_junos: JuniperJunos,
+  linux: LinuxSSH,
 };
 
-export function ssh_dispatcher(device_type) {
-  const ConnectionClass = CLASS_MAPPER[device_type];
-  if (!ConnectionClass) {
-    throw new Error(`Unsupported device type: ${device_type}`);
+export default function sshDispatcher(device, options = {}) {
+  const { logger } = options;
+  if (vendors[device.device_type]) {
+    const devWithLogger = { ...device, logger };
+    return new vendors[device.device_type](devWithLogger).connect();
   }
-  return ConnectionClass;
+  throw new Error(`Unsupported device type: ${device.device_type}`);
 }
