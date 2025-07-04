@@ -42,7 +42,9 @@ export default class BaseConnection {
   }
 
   escapeRegExp(string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+    // Convert to string if it's not already a string to avoid TypeError
+    const str = String(string || '');
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
   }
 
   _checkError(command, output, errorPattern = null) {
