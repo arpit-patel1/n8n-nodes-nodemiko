@@ -12,31 +12,31 @@ export class NodemikoApi implements ICredentialType {
 		},
 		{
 			displayName: 'Device Type',
-			name: 'deviceType',
+			name: 'device_type',
 			type: 'options',
-			default: 'cisco_ios',
 			options: [
 				{
 					name: 'Cisco IOS',
 					value: 'cisco_ios',
 				},
 				{
-					name: 'Cisco NX-OS',
-					value: 'cisco_nxos',
-				},
-				{
 					name: 'Cisco XR',
 					value: 'cisco_xr',
+				},
+				{
+					name: 'Cisco NX-OS',
+					value: 'cisco_nxos',
 				},
 				{
 					name: 'Juniper Junos',
 					value: 'juniper_junos',
 				},
 				{
-					name: 'Linux SSH',
-					value: 'linux_ssh',
+					name: 'Linux',
+					value: 'linux',
 				},
-			]
+			],
+			default: 'cisco_ios',
 		},
 		{
 			displayName: 'Username',
@@ -94,6 +94,12 @@ export class NodemikoApi implements ICredentialType {
 			description: 'The private SSH key to use for authentication',
 		},
 		{
+			displayName: 'Port',
+			name: 'port',
+			type: 'number',
+			default: 22,
+		},
+		{
 			displayName: 'Secret',
 			name: 'secret',
 			type: 'string',
@@ -101,6 +107,7 @@ export class NodemikoApi implements ICredentialType {
 				password: true,
 			},
 			default: '',
+			description: 'The enable secret.',
 		},
 	];
 } 
