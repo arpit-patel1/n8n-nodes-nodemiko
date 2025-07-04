@@ -1,8 +1,9 @@
-import { ICredentialType, INodeProperties } from 'n8n-workflow';
+import { Icon, ICredentialType, INodeProperties } from 'n8n-workflow';
 
 export class NodemikoApi implements ICredentialType {
 	name = 'nodemikoApi';
 	displayName = 'Nodemiko API';
+	icon: Icon = 'file:nodemiko.svg';
 	properties: INodeProperties[] = [
 		{
 			displayName: 'Host',

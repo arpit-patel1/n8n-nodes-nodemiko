@@ -181,6 +181,14 @@ export default class BaseConnection {
 
   async findPrompt() {
     console.log(`[Nodemiko Debug] findPrompt() called`);
+    console.log(`[Nodemiko Debug] findPrompt: Current base_prompt: ${JSON.stringify(this.base_prompt)}`);
+    
+    // If we already have a valid base_prompt, don't try to find a new one
+    if (this.base_prompt && this.base_prompt.length > 1) {
+      console.log(`[Nodemiko Debug] findPrompt: Already have valid base_prompt, returning existing: ${this.base_prompt}`);
+      return Promise.resolve(this.base_prompt);
+    }
+    
     return new Promise((resolve, reject) => {
       if (!this.stream) {
         console.log(`[Nodemiko Debug] findPrompt: No stream available`);

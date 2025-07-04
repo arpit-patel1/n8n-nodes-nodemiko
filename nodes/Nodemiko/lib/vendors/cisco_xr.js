@@ -21,7 +21,16 @@ export default class CiscoXR extends BaseConnection {
 
   async set_base_prompt() {
     console.log(`[Nodemiko Debug] CiscoXR set_base_prompt called`);
+    console.log(`[Nodemiko Debug] CiscoXR current base_prompt: ${JSON.stringify(this.base_prompt)}`);
     this._log('Setting Cisco XR base prompt...');
+    
+    // If we already have a valid base_prompt, preserve it
+    if (this.base_prompt && this.base_prompt.length > 1) {
+      console.log(`[Nodemiko Debug] CiscoXR already has valid base_prompt, keeping: ${this.base_prompt}`);
+      this._log(`Already have valid base_prompt, keeping: ${this.base_prompt}`);
+      return this.base_prompt;
+    }
+    
     try {
       const prompt = await super.set_base_prompt();
       console.log(`[Nodemiko Debug] CiscoXR received prompt from parent: ${JSON.stringify(prompt)}`);
