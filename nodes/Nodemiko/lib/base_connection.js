@@ -31,7 +31,10 @@ export default class BaseConnection {
   }
 
   _log(message) {
-    // Logger removed - debug logging disabled
+    // Temporary console logging for debugging
+    if (this.device && this.device.debug) {
+      console.log(`[Nodemiko Debug] ${message}`);
+    }
   }
 
   _delay(ms) {

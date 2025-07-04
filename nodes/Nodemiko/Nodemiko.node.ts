@@ -155,13 +155,33 @@ export class Nodemiko implements INodeType {
 				const commands = this.getNodeParameter('commands', itemIndex, '') as string;
 
 				await withConnection(device, async (conn: any) => {
+					if (device.debug) {
+						console.log(`[Nodemiko] Starting ${operation} operation with command: ${commands}`);
+					}
+					
 					let result;
 					if (operation === 'send_command') {
+						if (device.debug) {
+							console.log(`[Nodemiko] Calling conn.send_command with: ${commands}`);
+						}
 						result = await conn.send_command(commands);
+						if (device.debug) {
+							console.log(`[Nodemiko] send_command result: ${JSON.stringify(result)}`);
+						}
 					} else if (operation === 'send_config') {
+						if (device.debug) {
+							console.log(`[Nodemiko] Calling conn.send_config with: ${commands.split('\n')}`);
+						}
 						result = await conn.send_config(commands.split('\n'));
+						if (device.debug) {
+							console.log(`[Nodemiko] send_config result: ${JSON.stringify(result)}`);
+						}
 					} else {
 						throw new NodeApiError(this.getNode(), { message: `Unsupported operation: ${operation}` });
+					}
+
+					if (device.debug) {
+						console.log(`[Nodemiko] Final result before push: ${JSON.stringify(result)}`);
 					}
 
 					returnData.push({
@@ -173,6 +193,10 @@ export class Nodemiko implements INodeType {
 							item: itemIndex,
 						},
 					});
+					
+					if (device.debug) {
+						console.log(`[Nodemiko] Pushed to returnData. Current returnData length: ${returnData.length}`);
+					}
 				});
 
 
