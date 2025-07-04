@@ -151,7 +151,10 @@ export class Nodemiko implements INodeType {
 					read_timeout: options.read_timeout || 10000,
 					debug: options.debug || false,
 				};
-
+				Logger.info('device', device);
+				Logger.info('options', options);
+				Logger.info('credentials', credentials);
+				
 				const operation = this.getNodeParameter('operation', itemIndex, '');
 				const commands = this.getNodeParameter('commands', itemIndex, '') as string;
 
