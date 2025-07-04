@@ -13,6 +13,7 @@ export default class BaseConnection {
     this.config_prompt = /\(config.*\)#\s*$/;
     this.loggedIn = false;
     this.base_prompt = ''; // The detected prompt string, without regex formatting
+    this.debug = device.debug || false;
 
     // Timeouts
     this.conn_timeout = device.conn_timeout || 20000; // Default: 20 seconds
@@ -28,6 +29,12 @@ export default class BaseConnection {
     this.check_enable_mode = this.checkEnableMode;
     this.session_preparation = this.sessionPreparation;
     this.file_transfer = this.fileTransfer;
+  }
+
+  _log(message) {
+    if (this.debug) {
+      console.log(`[NODEMIKO-DEBUG] ${new Date().toISOString()}: ${message}`);
+    }
   }
 
   _delay(ms) {
@@ -48,6 +55,7 @@ export default class BaseConnection {
   connect() {
     return new Promise((resolve, reject) => {
       this.client.on('ready', () => {
+        this._log('SSH client ready.');
         this.client.shell((err, stream) => {
           if (err) return reject(err);
           this.stream = stream;
@@ -64,6 +72,7 @@ export default class BaseConnection {
         reject(err);
       });
 
+      this._log(`Connecting to ${this.device.host}:${this.device.port || 22}...`);
       const connectParams = {
         host: this.device.host,
         port: this.device.port || 22,
@@ -123,11 +132,13 @@ export default class BaseConnection {
       let buffer = '';
       const timeoutId = setTimeout(() => {
         this.stream.removeListener('data', onData);
+        this._log(`Read timeout looking for prompt: ${promptRegex}`);
         reject(new Error(`Read timeout (${timeout}ms) looking for prompt: ${promptRegex}`));
       }, timeout);
 
       const onData = (data) => {
         const received = data.toString().replace(STRIP_ANSI, '');
+        this._log(`readUntilPrompt received: ${JSON.stringify(received)}`);
         buffer += received;
         const match = buffer.match(promptRegex);
         if (match) {
@@ -191,6 +202,7 @@ export default class BaseConnection {
       delayFactor: delay_factor = 1,
     } = options;
 
+    this._log(`Sending command: ${command}`);
     return new Promise((resolve, reject) => {
       if (!this.stream) {
         return reject(new Error('Connection not established'));

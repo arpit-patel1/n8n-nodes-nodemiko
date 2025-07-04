@@ -172,6 +172,29 @@ export class Nodemiko implements INodeType {
 					},
 				],
 			},
+			{
+				displayName: 'Options',
+				name: 'options',
+				type: 'collection',
+				placeholder: 'Add Option',
+				default: {},
+				options: [
+					{
+						displayName: 'Debug',
+						name: 'debug',
+						type: 'boolean',
+						default: false,
+						description: 'Enable verbose logging for debugging purposes.',
+					},
+					{
+						displayName: 'Connection Timeout',
+						name: 'conn_timeout',
+						type: 'number',
+						default: 10000,
+						description: 'The connection timeout in milliseconds.',
+					},
+				],
+			},
 		],
 	};
 

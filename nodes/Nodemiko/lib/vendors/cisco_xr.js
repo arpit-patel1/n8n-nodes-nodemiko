@@ -11,16 +11,20 @@ export default class CiscoXR extends BaseConnection {
   }
 
   async sessionPreparation() {
+    this._log('Starting Cisco XR session preparation...');
     await this._delay(500 * this.global_delay_factor);
     this.stream.write('\n');
     await this.readUntilPrompt();
     await this.disablePaging();
+    this._log('Cisco XR session preparation complete.');
   }
 
   async set_base_prompt() {
+    this._log('Setting Cisco XR base prompt...');
     const prompt = await super.set_base_prompt();
     if (prompt) {
       this.base_prompt = prompt.slice(0, 31);
+      this._log(`Cisco XR prompt truncated to: ${this.base_prompt}`);
     }
     return this.base_prompt;
   }
@@ -37,6 +41,7 @@ export default class CiscoXR extends BaseConnection {
 
   async commit(commit_command = 'commit', options = {}) {
     const { read_timeout = 120000, confirm = false, confirm_delay = null, comment = '', label = '' } = options;
+    this._log(`Committing changes with command: ${commit_command}`);
     if ((confirm && !confirm_delay) || (confirm_delay && !confirm) || (comment && confirm)) {
       throw new Error('Invalid arguments supplied to XR commit');
     }
@@ -73,13 +78,16 @@ export default class CiscoXR extends BaseConnection {
     if (output.includes(alt_error_marker)) {
       this.stream.write('no\n');
       output += await this.readUntilPrompt();
+      this._log('Commit failed due to other sessions having pending changes.');
       throw new Error(`Commit failed with the following errors:\n\n${output}`);
     }
 
+    this._log('Commit successful.');
     return output;
   }
 
   async exitConfigMode(exit_command = 'end') {
+    this._log(`Exiting config mode with command: ${exit_command}`);
     let output = '';
     if (this.checkConfigMode()) {
       this.stream.write(`${exit_command}\n`);
@@ -87,14 +95,17 @@ export default class CiscoXR extends BaseConnection {
       output += await this.readUntilPrompt(uncommitted_pattern);
 
       if (output.includes('Uncommitted')) {
+        this._log('Uncommitted changes detected. Aborting exit.');
         this.stream.write('no\n');
         output += await this.readUntilPrompt();
       }
 
       if (this.checkConfigMode()) {
+        this._log('Failed to exit configuration mode.');
         throw new Error('Failed to exit configuration mode');
       }
     }
+    this._log('Exited config mode successfully.');
     return output;
   }
 
