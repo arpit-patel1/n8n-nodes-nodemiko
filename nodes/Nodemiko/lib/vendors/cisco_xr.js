@@ -22,9 +22,13 @@ export default class CiscoXR extends BaseConnection {
   async set_base_prompt() {
     this._log('Setting Cisco XR base prompt...');
     const prompt = await super.set_base_prompt();
+    this._log(`Received prompt from parent: ${JSON.stringify(prompt)}`);
     if (prompt) {
       this.base_prompt = prompt.slice(0, 31);
       this._log(`Cisco XR prompt truncated to: ${this.base_prompt}`);
+      // Update the prompt regex with the truncated prompt
+      this.prompt = new RegExp(this.escapeRegExp(this.base_prompt) + '\\s*$');
+      this._log(`Updated prompt regex to: ${this.prompt}`);
     }
     return this.base_prompt;
   }

@@ -130,11 +130,13 @@ export default class BaseConnection {
   }
 
   async readUntilPrompt(promptRegex = this.prompt, timeout = this.read_timeout) {
+    this._log(`readUntilPrompt called with regex: ${promptRegex}, timeout: ${timeout}ms`);
     return new Promise((resolve, reject) => {
       let buffer = '';
       const timeoutId = setTimeout(() => {
         this.stream.removeListener('data', onData);
         this._log(`Read timeout looking for prompt: ${promptRegex}`);
+        this._log(`Buffer content at timeout: ${JSON.stringify(buffer)}`);
         reject(new Error(`Read timeout (${timeout}ms) looking for prompt: ${promptRegex}`));
       }, timeout);
 
@@ -142,9 +144,12 @@ export default class BaseConnection {
         const received = data.toString().replace(STRIP_ANSI, '');
         this._log(`readUntilPrompt received: ${JSON.stringify(received)}`);
         buffer += received;
+        this._log(`Current buffer: ${JSON.stringify(buffer)}`);
         const match = buffer.match(promptRegex);
+        this._log(`Regex match result: ${match ? JSON.stringify(match) : 'no match'}`);
         if (match) {
           this.base_prompt = match[0].trim();
+          this._log(`Updated base_prompt to: ${this.base_prompt}`);
           clearTimeout(timeoutId);
           this.stream.removeListener('data', onData);
           resolve(buffer);
@@ -218,6 +223,10 @@ export default class BaseConnection {
     } = options;
 
     this._log(`Sending command: ${command}`);
+    this._log(`Command options: ${JSON.stringify(options)}`);
+    this._log(`Current prompt regex: ${this.prompt}`);
+    this._log(`Current base_prompt: ${this.base_prompt}`);
+    
     return new Promise((resolve, reject) => {
       if (!this.stream) {
         return reject(new Error('Connection not established'));
@@ -228,17 +237,27 @@ export default class BaseConnection {
         try {
           const promptRegex = expect_string ? new RegExp(expect_string) : this.prompt;
           const command_timeout = this.read_timeout * delay_factor;
+          this._log(`Using prompt regex: ${promptRegex} with timeout: ${command_timeout}ms`);
+          
           let output = await this.readUntilPrompt(promptRegex, command_timeout);
+          this._log(`Raw output received: ${JSON.stringify(output)}`);
 
           if (strip_command) {
-            output = output.replace(new RegExp(`^${command}\\s*\\r?\\n`), '');
+            const commandRegex = new RegExp(`^${command}\\s*\\r?\\n`);
+            this._log(`Stripping command with regex: ${commandRegex}`);
+            output = output.replace(commandRegex, '');
+            this._log(`After stripping command: ${JSON.stringify(output)}`);
           }
           if (strip_prompt) {
+            this._log(`Stripping prompt with regex: ${promptRegex}`);
             output = output.replace(promptRegex, '');
+            this._log(`After stripping prompt: ${JSON.stringify(output)}`);
           }
 
+          this._log(`Final output: ${JSON.stringify(output.trim())}`);
           resolve(output.trim());
         } catch (e) {
+          this._log(`Error in sendCommand: ${e.message}`);
           reject(e);
         }
       });
