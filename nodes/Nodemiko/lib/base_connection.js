@@ -166,18 +166,12 @@ export default class BaseConnection {
           const lines = output.trim().split('\n');
           const new_prompt = lines[lines.length - 1].trim();
           if (new_prompt && new_prompt.length > 1) {
-            this.base_prompt = new_prompt;
-            this.prompt = new RegExp(this.escapeRegExp(this.base_prompt) + '\\s*$');
-            resolve(this.prompt);
+            resolve(new_prompt);
           } else {
-            // Fallback to a generic prompt if detection fails
-            this.prompt = DEFAULT_PROMPT;
-            resolve(this.prompt);
+            reject(new Error('Failed to find prompt'));
           }
         } catch (e) {
-          // Fallback to a generic prompt on error
-          this.prompt = DEFAULT_PROMPT;
-          resolve(this.prompt);
+          reject(e);
         }
       });
     });
@@ -405,11 +399,15 @@ export default class BaseConnection {
   }
 
   async set_base_prompt() {
-    // For some devices, we need to do something special to find the prompt.
-    // This is a placeholder for those devices.
-    const prompt = await this.findPrompt();
-    this.prompt = new RegExp(this.escapeRegExp(prompt) + '\\s*$');
-    this.base_prompt = prompt;
+    try {
+        const prompt = await this.findPrompt();
+        this.prompt = new RegExp(this.escapeRegExp(prompt) + '\\s*$');
+        this.base_prompt = prompt;
+    } catch (e) {
+        this._log(`Failed to find prompt: ${e.message}. Falling back to default prompt.`);
+        this.prompt = DEFAULT_PROMPT;
+        this.base_prompt = '';
+    }
     return this.base_prompt;
   }
 
