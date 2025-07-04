@@ -1,4 +1,4 @@
-import sshDispatcher from '../ssh_dispatcher.js';
+import { sshDispatcher } from '../ssh_dispatcher.js';
 
 /**
  * A utility function that ensures the connection is closed after the task is complete.
@@ -7,7 +7,7 @@ import sshDispatcher from '../ssh_dispatcher.js';
  * @param {function} task - The async function to execute with the connection object.
  * @param {object} options - Additional options for the connection.
  */
-export default async function withConnection(device, callback, options = {}) {
+export async function withConnection(device, callback, options = {}) {
   const { logger } = options;
   let conn = null;
   try {

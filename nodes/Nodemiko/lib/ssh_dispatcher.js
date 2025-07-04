@@ -12,7 +12,7 @@ const vendors = {
   linux: LinuxSSH,
 };
 
-export default function sshDispatcher(device, options = {}) {
+export function sshDispatcher(device, options = {}) {
   const { logger } = options;
   if (vendors[device.device_type]) {
     const devWithLogger = { ...device, logger };

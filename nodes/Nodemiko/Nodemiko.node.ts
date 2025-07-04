@@ -11,7 +11,7 @@ import {
 
 const nodemiko = require('./lib/connect_handler');
 import sshDispatcher from './lib/ssh_dispatcher.js';
-import withConnection from './lib/utils/withConnection.js';
+import { withConnection } from './lib/utils/withConnection.js';
 
 export class Nodemiko implements INodeType {
 	description: INodeTypeDescription = {
