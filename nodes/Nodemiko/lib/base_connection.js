@@ -166,15 +166,34 @@ export default class BaseConnection {
           const lines = output.trim().split('\n');
           const new_prompt = lines[lines.length - 1].trim();
           if (new_prompt && new_prompt.length > 1) {
-            resolve(new_prompt);
+            this.base_prompt = new_prompt;
+            this.prompt = new RegExp(this.escapeRegExp(this.base_prompt) + '\\s*$');
+            resolve(this.base_prompt);
           } else {
-            reject(new Error('Failed to find prompt'));
+            // Fallback to a generic prompt if detection fails
+            this.prompt = DEFAULT_PROMPT;
+            resolve('');
           }
         } catch (e) {
-          reject(e);
+          // Fallback to a generic prompt on error
+          this.prompt = DEFAULT_PROMPT;
+          resolve('');
         }
       });
     });
+  }
+
+  async set_base_prompt() {
+    try {
+      const prompt = await this.findPrompt();
+      this.prompt = new RegExp(this.escapeRegExp(prompt) + '\\s*$');
+      this.base_prompt = prompt;
+    } catch (e) {
+      this._log(`Failed to find prompt: ${e.message}. Falling back to default prompt.`);
+      this.prompt = DEFAULT_PROMPT;
+      this.base_prompt = '';
+    }
+    return this.base_prompt;
   }
 
   async sessionPreparation() {
@@ -396,19 +415,6 @@ export default class BaseConnection {
         }
       });
     });
-  }
-
-  async set_base_prompt() {
-    try {
-        const prompt = await this.findPrompt();
-        this.prompt = new RegExp(this.escapeRegExp(prompt) + '\\s*$');
-        this.base_prompt = prompt;
-    } catch (e) {
-        this._log(`Failed to find prompt: ${e.message}. Falling back to default prompt.`);
-        this.prompt = DEFAULT_PROMPT;
-        this.base_prompt = '';
-    }
-    return this.base_prompt;
   }
 
   async disablePaging(command = 'terminal length 0') {
