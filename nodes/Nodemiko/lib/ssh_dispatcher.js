@@ -13,10 +13,8 @@ const vendors = {
 };
 
 export function sshDispatcher(device, options = {}) {
-  const { logger } = options;
   if (vendors[device.device_type]) {
-    const devWithLogger = { ...device, logger };
-    return new vendors[device.device_type](devWithLogger).connect();
+    return new vendors[device.device_type](device).connect();
   }
   throw new Error(`Unsupported device type: ${device.device_type}`);
 }

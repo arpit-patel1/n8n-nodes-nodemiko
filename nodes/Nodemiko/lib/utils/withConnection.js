@@ -5,13 +5,11 @@ import { sshDispatcher } from '../ssh_dispatcher.js';
  * It acts like a context manager.
  * @param {object} device - The device object for connection.
  * @param {function} task - The async function to execute with the connection object.
- * @param {object} options - Additional options for the connection.
  */
-export async function withConnection(device, callback, options = {}) {
-  const { logger } = options;
+export async function withConnection(device, callback) {
   let conn = null;
   try {
-    conn = await sshDispatcher(device, { logger });
+    conn = await sshDispatcher(device);
     await callback(conn);
   } finally {
     if (conn) {

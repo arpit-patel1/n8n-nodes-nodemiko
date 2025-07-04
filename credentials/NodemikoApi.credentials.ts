@@ -16,23 +16,23 @@ export class NodemikoApi implements ICredentialType {
 			type: 'options',
 			options: [
 				{
-					name: 'Cisco IOS',
+					name: 'cisco_ios',
 					value: 'cisco_ios',
 				},
 				{
-					name: 'Cisco XR',
+					name: 'cisco_xr',
 					value: 'cisco_xr',
 				},
 				{
-					name: 'Cisco NX-OS',
+					name: 'cisco_nxos',
 					value: 'cisco_nxos',
 				},
 				{
-					name: 'Juniper Junos',
+					name: 'juniper_junos',
 					value: 'juniper_junos',
 				},
 				{
-					name: 'Linux',
+					name: 'linux',
 					value: 'linux',
 				},
 			],

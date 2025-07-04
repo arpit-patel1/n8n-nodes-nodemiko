@@ -13,7 +13,6 @@ export default class BaseConnection {
     this.config_prompt = /\(config.*\)#\s*$/;
     this.loggedIn = false;
     this.base_prompt = ''; // The detected prompt string, without regex formatting
-    this.logger = device.logger;
 
     // Timeouts
     this.conn_timeout = device.conn_timeout || 20000; // Default: 20 seconds
@@ -32,9 +31,7 @@ export default class BaseConnection {
   }
 
   _log(message) {
-    if (this.logger && typeof this.logger.debug === 'function') {
-      this.logger.debug(message);
-    }
+    // Logger removed - debug logging disabled
   }
 
   _delay(ms) {
