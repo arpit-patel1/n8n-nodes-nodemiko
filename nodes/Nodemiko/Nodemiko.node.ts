@@ -164,7 +164,15 @@ export class Nodemiko implements INodeType {
 						if (device.debug) {
 							console.log(`[Nodemiko] Calling conn.sendCommand with: ${commands}`);
 						}
+						// Add debug info about the connection object
+						console.log(`[Nodemiko Debug] Connection object type: ${typeof conn}`);
+						console.log(`[Nodemiko Debug] Connection object constructor: ${conn.constructor.name}`);
+						console.log(`[Nodemiko Debug] sendCommand method exists: ${typeof conn.sendCommand}`);
+						console.log(`[Nodemiko Debug] Connection object keys: ${Object.keys(conn)}`);
+						
 						result = await conn.sendCommand(commands);
+						console.log(`[Nodemiko Debug] Raw sendCommand result type: ${typeof result}`);
+						console.log(`[Nodemiko Debug] Raw sendCommand result length: ${result ? result.length : 'null/undefined'}`);
 						if (device.debug) {
 							console.log(`[Nodemiko] sendCommand result: ${JSON.stringify(result)}`);
 						}
